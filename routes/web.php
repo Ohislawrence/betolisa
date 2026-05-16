@@ -71,6 +71,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         ->name('subscriptions.extend');
     Route::get('reports/revenue', [AdminSubscriptionController::class, 'revenue'])
         ->name('subscriptions.revenue');
+    Route::post('subscriptions/transactions/{transaction}/approve', [AdminSubscriptionController::class, 'approveTransfer'])
+        ->name('subscriptions.transfer.approve');
+    Route::post('subscriptions/transactions/{transaction}/reject', [AdminSubscriptionController::class, 'rejectTransfer'])
+        ->name('subscriptions.transfer.reject');
 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
@@ -121,6 +125,7 @@ Route::middleware(['auth', 'verified', 'role:bettor'])->prefix('bettor')->name('
     // Payments
     Route::get('/plans', [PaymentController::class, 'plans'])->name('plans');
     Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
+    Route::post('/payment/transfer', [PaymentController::class, 'initializeTransfer'])->name('payment.transfer');
     Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
     Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/history', [PaymentController::class, 'history'])->name('payment.history');

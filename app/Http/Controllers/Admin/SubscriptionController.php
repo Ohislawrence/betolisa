@@ -24,6 +24,50 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Approve a pending bank transfer and activate subscription
+     */
+    public function approveTransfer(Transaction $transaction)
+    {
+        if ($transaction->payment_channel !== 'bank_transfer' || $transaction->status !== 'pending') {
+            return redirect()->back()->with('error', 'This transaction cannot be approved.');
+        }
+
+        $subscription = $this->subscriptionService->processSuccessfulPayment(
+            $transaction->reference,
+            [
+                'channel'  => 'bank_transfer',
+                'status'   => 'success',
+                'paid_at'  => now()->toIso8601String(),
+                'amount'   => $transaction->amount * 100, // kobo
+                'currency' => 'NGN',
+            ]
+        );
+
+        if (!$subscription) {
+            return redirect()->back()->with('error', 'Failed to activate subscription. Check logs.');
+        }
+
+        return redirect()->route('admin.subscriptions.index')
+            ->with('success', 'Transfer approved and subscription activated for ' . $transaction->user->name . '.');
+    }
+
+    /**
+     * Reject (delete) a pending bank transfer
+     */
+    public function rejectTransfer(Transaction $transaction)
+    {
+        if ($transaction->payment_channel !== 'bank_transfer' || $transaction->status !== 'pending') {
+            return redirect()->back()->with('error', 'This transaction cannot be rejected.');
+        }
+
+        $userName = $transaction->user->name;
+        $transaction->update(['status' => 'failed']);
+
+        return redirect()->route('admin.subscriptions.index')
+            ->with('success', 'Transfer from ' . $userName . ' has been rejected.');
+    }
+
+    /**
      * List all subscriptions
      */
     public function index(Request $request)
@@ -55,7 +99,13 @@ class SubscriptionController extends Controller
         $subscriptions = $query->latest()->paginate(15);
         $stats = $this->subscriptionService->getStats();
 
-        return view('admin.subscriptions.index', compact('subscriptions', 'stats'));
+        $pendingTransfers = Transaction::with('user')
+            ->where('payment_channel', 'bank_transfer')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        return view('admin.subscriptions.index', compact('subscriptions', 'stats', 'pendingTransfers'));
     }
 
     /**

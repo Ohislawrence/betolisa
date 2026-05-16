@@ -153,6 +153,55 @@ class PaymentController extends Controller
     }
 
     /**
+     * Initialize bank transfer payment
+     */
+    public function initializeTransfer(Request $request)
+    {
+        $request->validate([
+            'sender_name'   => 'required|string|max:255',
+            'transfer_date' => 'required|date|before_or_equal:today',
+            'note'          => 'nullable|string|max:200',
+        ]);
+
+        $user   = auth()->user();
+        $amount = Setting::getValue('subscription_cost', 5000);
+
+        $reference = 'TRF-' . strtoupper(Str::random(8)) . '-' . time();
+
+        try {
+            Transaction::create([
+                'user_id'          => $user->id,
+                'reference'        => $reference,
+                'amount'           => $amount,
+                'currency'         => 'NGN',
+                'status'           => 'pending',
+                'payment_channel'  => 'bank_transfer',
+                'metadata'         => [
+                    'sender_name'   => $request->sender_name,
+                    'transfer_date' => $request->transfer_date,
+                    'note'          => $request->note,
+                    'bank'          => 'GTB',
+                    'account'       => '3004085537',
+                    'account_name'  => 'BETOLISA LIMITED',
+                ],
+            ]);
+
+            return redirect()->route('bettor.payment.history')
+                ->with('success', 'Transfer submitted! Your subscription will be activated once your payment is confirmed by our team.');
+
+        } catch (\Exception $e) {
+            Log::error('Bank transfer submission failed', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Could not submit your transfer. Please try again.');
+        }
+    }
+
+    /**
      * Payment success page
      */
     public function success()
