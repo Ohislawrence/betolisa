@@ -64,7 +64,7 @@
                 </div>
 
                 <a href="{{ route('bettor.payment.options') }}"
-                    class="block w-full text-center bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-xl transition-all text-lg shadow hover:shadow-md">
+                    class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all text-lg shadow hover:shadow-md">
                     {{ $activeSubscription ? 'Renew Subscription →' : 'Subscribe Now →' }}
                 </a>
                 <p class="text-xs text-gray-400 text-center mt-3">Choose your preferred payment method on the next page</p>

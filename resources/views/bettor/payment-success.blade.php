@@ -68,7 +68,7 @@
             {{-- Action buttons --}}
             <div class="flex flex-wrap gap-3 justify-center pb-4">
                 <a href="{{ route('bettor.dashboard') }}"
-                    class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow">
+                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow">
                     Go to Dashboard →
                 </a>
                 <a href="{{ route('bettor.payment.history') }}"

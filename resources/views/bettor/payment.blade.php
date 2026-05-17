@@ -52,7 +52,7 @@
                 <div class="border-b border-gray-200 overflow-x-auto">
                     <div class="flex w-full">
                         <button onclick="switchTab('card')" id="tab-card"
-                            class="tab-btn flex-1 px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-medium text-center border-b-2 transition-all whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 border-amber-500 text-amber-600 bg-amber-50">
+                            class="tab-btn flex-1 px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-medium text-center border-b-2 transition-all whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 border-blue-600 text-blue-700 bg-blue-50">
                             💳 <span>Pay Online</span>
                         </button>
                         <button onclick="switchTab('transfer')" id="tab-transfer"
@@ -162,7 +162,7 @@
                                         placeholder="e.g. bank session ID or teller number">
                                 </div>
                                 <button type="submit"
-                                    class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md">
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
@@ -216,7 +216,7 @@
                                 @error('message')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                             </div>
                             <button type="submit"
-                                class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md">
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                 </svg>
@@ -244,13 +244,13 @@
             TABS.forEach(function(t) {
                 document.getElementById('panel-' + t).classList.add('hidden');
                 const btn = document.getElementById('tab-' + t);
-                btn.classList.remove('border-amber-500', 'text-amber-600', 'bg-amber-50');
+                btn.classList.remove('border-blue-600', 'text-blue-700', 'bg-blue-50');
                 btn.classList.add('border-transparent', 'text-gray-500');
             });
             document.getElementById('panel-' + tab).classList.remove('hidden');
             const active = document.getElementById('tab-' + tab);
             active.classList.remove('border-transparent', 'text-gray-500');
-            active.classList.add('border-amber-500', 'text-amber-600', 'bg-amber-50');
+            active.classList.add('border-blue-600', 'text-blue-700', 'bg-blue-50');
         }
 
         function copyAcct() {
