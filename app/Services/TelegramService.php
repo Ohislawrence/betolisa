@@ -29,9 +29,11 @@ class TelegramService
     }
 
     /**
-     * Add member to group using invite link
+     * DM a one-time invite link to a user via the bot.
+     * The $inviteLink must be a per-user link created by createUserInviteLink().
+     * Note: the user must have started a chat with the bot first.
      */
-    public function addMemberToGroup(string $telegramNumber): array
+    public function addMemberToGroup(string $telegramNumber, string $inviteLink): array
     {
         if (!$this->isConfigured()) {
             Log::error('Telegram not configured');
@@ -42,42 +44,32 @@ class TelegramService
         }
 
         try {
-            // First, get the invite link if we don't have one
-            $inviteLink = $this->getGroupInviteLink();
+            $userId = $this->getUserIdFromTelegramNumber($telegramNumber);
 
-            if (!$inviteLink) {
+            if (!$userId) {
                 return [
                     'success' => false,
-                    'message' => 'Could not generate invite link.'
+                    'message' => 'Could not find Telegram user. They must message the bot first.'
                 ];
             }
 
-            // Send message to user with invite link
-            // Note: For this to work, the user must have started a chat with the bot
-            $userId = $this->getUserIdFromTelegramNumber($telegramNumber);
+            $this->sendMessage(
+                $userId,
+                "🎉 Welcome to the Premium Tips Group!\n\n" .
+                "Here's your exclusive one-time invite link:\n" .
+                $inviteLink . "\n\n" .
+                "⚠️ This link is personal — it works for you only and expires with your subscription.\n" .
+                "Enjoy premium tips! 📊⚽"
+            );
 
-            if ($userId) {
-                $this->sendMessage(
-                    $userId,
-                    "🎉 Welcome to the Premium Tips Group!\n\n" .
-                    "Here's your exclusive invite link:\n" .
-                    $inviteLink . "\n\n" .
-                    "This link will expire when your subscription ends.\n" .
-                    "Enjoy premium tips! 📊⚽"
-                );
-            }
-
-            Log::info('Member added to Telegram group', [
+            Log::info('Per-user invite link sent to Telegram user', [
                 'telegram_number' => $telegramNumber,
-                'invite_link' => $inviteLink
             ]);
 
             return [
                 'success' => true,
-                'message' => 'Invite link generated and sent successfully.',
-                'data' => [
-                    'invite_link' => $inviteLink,
-                ]
+                'message' => 'Invite link sent successfully.',
+                'data' => ['invite_link' => $inviteLink]
             ];
         } catch (\Exception $e) {
             Log::error('Telegram add member error', [
@@ -87,7 +79,7 @@ class TelegramService
 
             return [
                 'success' => false,
-                'message' => 'Failed to add member to group: ' . $e->getMessage()
+                'message' => 'Failed to send invite link: ' . $e->getMessage()
             ];
         }
     }
@@ -207,10 +199,9 @@ class TelegramService
                 return $storedLink;
             }
 
-            // Create a new invite link via API
+            // Create a new invite link via API (no member_limit — this is an admin reference link)
             $response = Http::post($this->apiUrl . '/createChatInviteLink', [
                 'chat_id' => $this->groupId,
-                'member_limit' => 1,
                 'creates_join_request' => false,
             ]);
 

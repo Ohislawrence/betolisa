@@ -50,7 +50,7 @@ class AddToTelegramGroup implements ShouldQueue
         }
 
         // Try to DM the link to the user via the bot
-        $result = $telegramService->addMemberToGroup($this->user->telegram_number);
+        $result = $telegramService->addMemberToGroup($this->user->telegram_number, $inviteLink);
 
         if (!$result['success']) {
             Log::error('Failed to DM Telegram invite to user', [

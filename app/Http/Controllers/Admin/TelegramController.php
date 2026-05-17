@@ -136,7 +136,7 @@ class TelegramController extends Controller
         // Try to DM the link via the bot
         $dmSent = false;
         if ($user->telegram_number) {
-            $result  = $this->telegramService->addMemberToGroup($user->telegram_number);
+            $result  = $this->telegramService->addMemberToGroup($user->telegram_number, $inviteLink);
             $dmSent  = $result['success'];
         }
 

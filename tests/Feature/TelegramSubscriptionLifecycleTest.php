@@ -84,7 +84,7 @@ class TelegramSubscriptionLifecycleTest extends TestCase
             ->andReturn('https://t.me/+unique_link_abc');
 
         $mock->shouldReceive('addMemberToGroup')->once()
-            ->with('@testuser')
+            ->with('@testuser', Mockery::any())
             ->andReturn(['success' => true, 'message' => 'Sent.']);
 
         $user = $this->makeUser('@testuser');
