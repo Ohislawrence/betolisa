@@ -123,7 +123,7 @@
                                     </div>
                                 </div>
                                 <button onclick="copyAcct()" id="copy-btn"
-                                    class="mt-4 w-full text-xs text-amber-700 border border-amber-300 rounded-lg py-2.5 hover:bg-amber-100 transition-colors font-medium">
+                                    class="mt-4 w-full text-xs text-blue-700 border border-blue-300 rounded-lg py-2.5 hover:bg-blue-100 transition-colors font-medium">
                                     📋 Copy Account Number
                                 </button>
                             </div>
@@ -257,10 +257,10 @@
             navigator.clipboard.writeText('3004085537').then(function () {
                 const btn = document.getElementById('copy-btn');
                 btn.textContent = '✓ Copied!';
-                btn.classList.add('bg-amber-100');
+                btn.classList.add('bg-blue-100');
                 setTimeout(() => {
                     btn.textContent = '📋 Copy Account Number';
-                    btn.classList.remove('bg-amber-100');
+                    btn.classList.remove('bg-blue-100');
                 }, 2000);
             });
         }

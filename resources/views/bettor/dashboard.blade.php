@@ -62,7 +62,7 @@
                                         @endforeach
                                     </div>
                                     <a href="{{ route('bettor.plans') }}"
-                                        class="flex items-center justify-center gap-2 w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition-all duration-200 hover:shadow-md text-sm">
+                                        class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all duration-200 hover:shadow-md text-sm">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>
                                         </svg>
@@ -240,7 +240,7 @@
                                             Subscribe to unlock expert premium picks, high-odds selections, and Telegram group access.
                                         </p>
                                         <a href="{{ route('bettor.plans') }}"
-                                            class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold px-8 py-3 rounded-xl transition-all shadow hover:shadow-md text-sm">
+                                            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl transition-all shadow hover:shadow-md text-sm">
                                             Unlock Premium Now
                                         </a>
                                     </div>
