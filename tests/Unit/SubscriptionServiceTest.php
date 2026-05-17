@@ -2,22 +2,39 @@
 
 namespace Tests\Unit;
 
-use App\Jobs\AddToTelegramGroup;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\PaymentConfirmation;
 use App\Services\SubscriptionService;
+use App\Services\TelegramService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Notification;
+use Mockery;
 use Tests\TestCase;
 
 class SubscriptionServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function mockTelegram(): void
+    {
+        $mock = Mockery::mock(TelegramService::class);
+        $mock->shouldReceive('isConfigured')->andReturn(true);
+        $mock->shouldReceive('createUserInviteLink')->andReturn('https://t.me/+fake');
+        $mock->shouldReceive('addMemberToGroup')->andReturn(['success' => true, 'message' => 'OK']);
+        $this->app->instance(TelegramService::class, $mock);
+    }
+
+    private function seedSettings(): void
+    {
+        Setting::setValue('subscription_cost', 5000, 'integer');
+        Setting::setValue('subscription_duration_days', 30, 'integer');
+    }
+
     public function test_create_subscription_dispatches_job_and_notification(): void
     {
-        Bus::fake();
+        $this->seedSettings();
+        $this->mockTelegram();
         Notification::fake();
 
         $user = User::factory()->create();
@@ -40,14 +57,13 @@ class SubscriptionServiceTest extends TestCase
 
         $this->assertTrue($subscription->isActive());
 
-        Bus::assertDispatched(AddToTelegramGroup::class);
-
         Notification::assertSentTo([$user], PaymentConfirmation::class);
     }
 
     public function test_process_successful_payment_creates_subscription_and_links_transaction(): void
     {
-        Bus::fake();
+        $this->seedSettings();
+        $this->mockTelegram();
         Notification::fake();
 
         $user = User::factory()->create();

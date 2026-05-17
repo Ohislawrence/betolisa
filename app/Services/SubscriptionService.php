@@ -54,8 +54,14 @@ class SubscriptionService
         ]);
 
         if ($subscription) {
-            // Run synchronously — no queue worker needed
-            AddToTelegramGroup::dispatchSync($user);
+            try {
+                AddToTelegramGroup::dispatchSync($user);
+            } catch (\Exception $e) {
+                Log::error('Telegram invite failed after subscription creation', [
+                    'user_id' => $user->id,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
         }
 
         if ($subscription) {

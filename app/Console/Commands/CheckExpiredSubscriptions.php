@@ -56,8 +56,15 @@ class CheckExpiredSubscriptions extends Command
         ]);
 
         // Run synchronously — no queue worker needed
-        RemoveFromTelegramGroup::dispatchSync($subscription->user);
-
-        $this->line("✓ Removed user #{$subscription->user_id} from Telegram group");
+        try {
+            RemoveFromTelegramGroup::dispatchSync($subscription->user);
+            $this->line("✓ Removed user #{$subscription->user_id} from Telegram group");
+        } catch (\Exception $e) {
+            Log::error('Telegram removal failed', [
+                'user_id' => $subscription->user_id,
+                'error'   => $e->getMessage(),
+            ]);
+            $this->warn("! Telegram removal failed for user #{$subscription->user_id}: {$e->getMessage()}");
+        }
     }
 }

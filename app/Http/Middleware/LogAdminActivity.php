@@ -17,16 +17,18 @@ class LogAdminActivity
         if (in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             $user = $request->user();
 
-            Log::channel('admin')->info('Admin Action', [
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'action' => $request->method(),
-                'url' => $request->fullUrl(),
-                'route' => $request->route()?->getName(),
-                'ip' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'input' => $request->except(['password', 'password_confirmation', '_token']),
-            ]);
+            if ($user) {
+                Log::channel('admin')->info('Admin Action', [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'action' => $request->method(),
+                    'url' => $request->fullUrl(),
+                    'route' => $request->route()?->getName(),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'input' => $request->except(['password', 'password_confirmation', '_token']),
+                ]);
+            }
         }
 
         return $response;
