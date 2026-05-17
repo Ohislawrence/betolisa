@@ -7,8 +7,10 @@ use App\Models\Setting;
 use App\Models\Transaction;
 use App\Services\PaystackService;
 use App\Services\SubscriptionService;
+use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -33,6 +35,79 @@ class PaymentController extends Controller
         $activeSubscription = $user->activeSubscription;
 
         return view('bettor.plans', compact('cost', 'duration', 'activeSubscription'));
+    }
+
+    /**
+     * Show payment method options page
+     */
+    public function options()
+    {
+        $cost = Setting::getValue('subscription_cost', 5000);
+        $duration = Setting::getValue('subscription_duration_days', 30);
+        $adminTelegram = Setting::getValue('admin_telegram_handle', '');
+
+        return view('bettor.payment', compact('cost', 'duration', 'adminTelegram'));
+    }
+
+    /**
+     * Handle email contact form — sends the bettor's message to the admin email
+     */
+    public function contactEmail(Request $request)
+    {
+        $request->validate([
+            'subject' => 'nullable|string|max:150',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        $user       = auth()->user();
+        $cost       = Setting::getValue('subscription_cost', 5000);
+        $adminEmail = Setting::getValue('admin_email', config('mail.from.address'));
+        $subject    = $request->filled('subject') ? $request->subject : 'Subscription Payment Enquiry';
+
+        try {
+            Mail::raw(
+                "Payment enquiry from: {$user->name} ({$user->email})\n" .
+                "Plan: Premium — \u{20A6}" . number_format($cost) . "\n\n" .
+                "--- Message ---\n" .
+                $request->message,
+                function ($mail) use ($adminEmail, $subject, $user) {
+                    $mail->to($adminEmail)
+                         ->replyTo($user->email, $user->name)
+                         ->subject($subject);
+                }
+            );
+
+            return redirect()->route('bettor.payment.options')
+                ->with('active_tab', 'email')
+                ->with('email_sent', true)
+                ->with('success', 'Your message has been sent! We will reply to ' . $user->email . ' shortly.');
+
+        } catch (\Exception $e) {
+            Log::error('Payment contact email failed', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['message' => 'Could not send your message. Please try again later.']);
+        }
+    }
+    /**
+     * Send a notification message to the admin via the Telegram bot
+     */
+    protected function sendAdminTelegramAlert(string $message): void
+    {
+        try {
+            $telegram = app(TelegramService::class);
+            $groupId  = Setting::getValue('telegram_group_id', '');
+
+            if ($telegram->isConfigured() && $groupId) {
+                $telegram->sendMessage($groupId, $message);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Admin Telegram alert failed', ['error' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -206,13 +281,16 @@ class PaymentController extends Controller
      */
     public function success()
     {
-        $subscription = session('subscription');
+        $user         = auth()->user();
+        $subscription = $user->activeSubscription;
 
-        if (!$subscription) {
-            $subscription = auth()->user()->activeSubscription;
-        }
+        // Generate a fresh, per-user, one-time invite link so only this subscriber can join
+        $telegramService = app(TelegramService::class);
+        $groupLink = $telegramService->isConfigured()
+            ? $telegramService->createUserInviteLink($user)
+            : null;
 
-        return view('bettor.payment-success', compact('subscription'));
+        return view('bettor.payment-success', compact('subscription', 'groupLink'));
     }
 
     /**

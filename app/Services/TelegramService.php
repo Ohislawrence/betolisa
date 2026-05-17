@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use App\Models\Subscription;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -145,6 +146,51 @@ class TelegramService
                 'success' => false,
                 'message' => 'Failed to remove member: ' . $e->getMessage()
             ];
+        }
+    }
+
+    /**
+     * Create a single-use invite link for one specific user.
+     * The link expires when their subscription ends (or in 48 h if no subscription found).
+     * This ensures unpaid users cannot reuse the same link.
+     */
+    public function createUserInviteLink(\App\Models\User $user): ?string
+    {
+        if (!$this->isConfigured()) {
+            return null;
+        }
+
+        try {
+            $subscription = $user->activeSubscription;
+            $expireDate   = $subscription
+                ? $subscription->ends_at->timestamp
+                : now()->addHours(48)->timestamp;
+
+            $response = Http::post($this->apiUrl . '/createChatInviteLink', [
+                'chat_id'              => $this->groupId,
+                'member_limit'         => 1,
+                'expire_date'          => $expireDate,
+                'creates_join_request' => false,
+            ]);
+
+            $data = $response->json();
+
+            if ($response->successful() && $data['ok']) {
+                Log::info('Per-user Telegram invite link created', [
+                    'user_id'   => $user->id,
+                    'expire_at' => $expireDate,
+                ]);
+                return $data['result']['invite_link'];
+            }
+
+            Log::error('Failed to create per-user invite link', [
+                'user_id'  => $user->id,
+                'response' => $data,
+            ]);
+            return null;
+        } catch (\Exception $e) {
+            Log::error('createUserInviteLink error', ['error' => $e->getMessage()]);
+            return null;
         }
     }
 

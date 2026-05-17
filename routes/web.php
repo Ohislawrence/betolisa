@@ -17,6 +17,13 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::get('/dashboard', function () {
+    if (auth()->user()?->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    }
+    return redirect()->route('bettor.dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
 Route::get('/terms', function () {
     return view('terms');
 })->name('terms');
@@ -91,6 +98,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
             ->name('telegram.test');
         Route::post('/telegram/invite-link', [TelegramController::class, 'getInviteLink'])
             ->name('telegram.invite-link');
+        Route::post('/telegram/members/{user}/resend-invite', [TelegramController::class, 'resendInvite'])
+            ->name('telegram.member.resend-invite');
         Route::put('/telegram/free-group', [TelegramController::class, 'updateFreeGroup'])
             ->name('telegram.free-group.update');
     });
@@ -124,8 +133,10 @@ Route::middleware(['auth', 'verified', 'role:bettor'])->prefix('bettor')->name('
 
     // Payments
     Route::get('/plans', [PaymentController::class, 'plans'])->name('plans');
+    Route::get('/payment', [PaymentController::class, 'options'])->name('payment.options');
     Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
     Route::post('/payment/transfer', [PaymentController::class, 'initializeTransfer'])->name('payment.transfer');
+    Route::post('/payment/contact', [PaymentController::class, 'contactEmail'])->name('payment.contact');
     Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
     Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/history', [PaymentController::class, 'history'])->name('payment.history');

@@ -37,22 +37,34 @@ class AddToTelegramGroup implements ShouldQueue
             'attempt' => $this->attempts()
         ]);
 
+        // Generate a per-user, one-time invite link instead of the shared global link
+        $inviteLink = $telegramService->createUserInviteLink($this->user);
+
+        if (!$inviteLink) {
+            Log::error('Could not create invite link for user', ['user_id' => $this->user->id]);
+
+            if ($this->attempts() < $this->tries) {
+                throw new \Exception('Could not create Telegram invite link');
+            }
+            return;
+        }
+
+        // Try to DM the link to the user via the bot
         $result = $telegramService->addMemberToGroup($this->user->telegram_number);
 
         if (!$result['success']) {
-            Log::error('Failed to add user to Telegram group', [
+            Log::error('Failed to DM Telegram invite to user', [
                 'user_id' => $this->user->id,
                 'telegram' => $this->user->telegram_number,
                 'result' => $result,
                 'attempt' => $this->attempts()
             ]);
 
-            // If we have retries left, throw exception to retry
             if ($this->attempts() < $this->tries) {
                 throw new \Exception($result['message']);
             }
         } else {
-            Log::info('User added to Telegram group successfully', [
+            Log::info('Telegram invite sent to user successfully', [
                 'user_id' => $this->user->id,
                 'telegram' => $this->user->telegram_number
             ]);

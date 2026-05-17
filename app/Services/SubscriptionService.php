@@ -54,8 +54,8 @@ class SubscriptionService
         ]);
 
         if ($subscription) {
-            // Dispatch Telegram add job
-            AddToTelegramGroup::dispatch($user);
+            // Run synchronously — no queue worker needed
+            AddToTelegramGroup::dispatchSync($user);
         }
 
         if ($subscription) {

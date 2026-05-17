@@ -19,6 +19,12 @@
                 </div>
             @endif
 
+            @if(session('warning'))
+                <div class="bg-amber-50 border border-amber-400 text-amber-800 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ session('warning') }}</span>
+                </div>
+            @endif
+
             <!-- Connection Status -->
             <div class="bg-white rounded-lg shadow p-6 mb-8">
                 <h3 class="text-lg font-medium mb-4">Connection Status</h3>
@@ -95,6 +101,19 @@
                                 @error('telegram_group_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
+                            </div>
+
+                            <div>
+                                <label for="admin_telegram_handle" class="block text-sm font-medium text-gray-700">
+                                    Admin Telegram Username
+                                </label>
+                                <input type="text" name="admin_telegram_handle" id="admin_telegram_handle"
+                                    value="{{ old('admin_telegram_handle', $adminTelegramHandle) }}"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    placeholder="@yourusername">
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Your personal Telegram handle (e.g. @betolisa). Used so users can contact you directly for alternative payments.
+                                </p>
                             </div>
 
                             @if($groupLink)
@@ -198,6 +217,108 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Channel Members -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-8">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Channel Members</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">
+                                Users with an active subscription who should be in the premium Telegram group.
+                                @if($memberCount > 0)
+                                    &bull; <span class="font-medium text-blue-600">{{ $memberCount }} total in group</span> (per Telegram)
+                                @endif
+                            </p>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-amber-100 text-amber-800">
+                            {{ $channelMembers->count() }} active subscriber{{ $channelMembers->count() !== 1 ? 's' : '' }}
+                        </span>
+                    </div>
+
+                    @if($channelMembers->isEmpty())
+                        <div class="text-center py-10 text-gray-400">
+                            <svg class="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <p class="text-sm">No active subscribers yet.</p>
+                        </div>
+                    @else
+                        <div class="overflow-x-auto rounded-lg border border-gray-200">
+                            <table class="min-w-full text-sm divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">#</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Name</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Email</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Telegram</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Expires</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Days Left</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 bg-white">
+                                    @foreach($channelMembers as $i => $member)
+                                        @php $sub = $member->activeSubscription; @endphp
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-4 py-3 text-gray-400">{{ $i + 1 }}</td>
+                                            <td class="px-4 py-3 font-medium text-gray-900">{{ $member->name }}</td>
+                                            <td class="px-4 py-3 text-gray-600">{{ $member->email }}</td>
+                                            <td class="px-4 py-3">
+                                                @if($member->telegram_number)
+                                                    <a href="https://t.me/{{ ltrim($member->telegram_number, '@') }}" target="_blank"
+                                                        class="inline-flex items-center gap-1 text-blue-600 hover:underline font-mono text-xs">
+                                                        {{ $member->telegram_number }}
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                        </svg>
+                                                    </a>
+                                                @else
+                                                    <span class="text-gray-400 italic text-xs">Not set</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-700">
+                                                @if($sub && $sub->ends_at)
+                                                    {{ $sub->ends_at->format('d M Y') }}
+                                                @else
+                                                    <span class="text-gray-400">—</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                @if($sub && $sub->ends_at)
+                                                    @php $days = now()->diffInDays($sub->ends_at, false); @endphp
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                                        {{ $days <= 3 ? 'bg-red-100 text-red-700' : ($days <= 7 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') }}">
+                                                        {{ $days }} day{{ $days !== 1 ? 's' : '' }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-gray-400">—</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <form method="POST"
+                                                    action="{{ route('admin.settings.telegram.member.resend-invite', $member) }}">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="inline-flex items-center gap-1 text-xs bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-medium px-3 py-1.5 rounded-lg transition-colors">
+                                                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                                        </svg>
+                                                        Resend Invite
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="mt-3 text-xs text-gray-400">
+                            ⚠️ The Telegram Bot API does not provide a list of group members. This table is based on your app's subscription records. Use it to verify who should be in the group.
+                        </p>
+                    @endif
                 </div>
             </div>
 

@@ -55,9 +55,9 @@ class CheckExpiredSubscriptions extends Command
             'is_active' => false,
         ]);
 
-        // Queue Telegram removal
-        RemoveFromTelegramGroup::dispatch($subscription->user);
+        // Run synchronously — no queue worker needed
+        RemoveFromTelegramGroup::dispatchSync($subscription->user);
 
-        $this->line("✓ Queued removal for user #{$subscription->user_id}");
+        $this->line("✓ Removed user #{$subscription->user_id} from Telegram group");
     }
 }

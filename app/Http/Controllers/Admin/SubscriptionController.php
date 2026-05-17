@@ -181,8 +181,8 @@ class SubscriptionController extends Controller
         // Link transaction to subscription
         $transaction->update(['subscription_id' => $subscription->id]);
 
-        // Queue Telegram addition
-        AddToTelegramGroup::dispatch($user);
+        // Run synchronously — no queue worker needed
+        AddToTelegramGroup::dispatchSync($user);
 
         return redirect()->route('admin.subscriptions.show', $subscription)
             ->with('success', 'Manual subscription created successfully.');
