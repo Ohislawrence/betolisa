@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TelegramController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Bettor\PaymentController;
 use App\Http\Controllers\Bettor\TipController as BettorTipController;
 use App\Http\Controllers\Bettor\ProfileController as BettorProfileController;
@@ -103,6 +104,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         Route::put('/telegram/free-group', [TelegramController::class, 'updateFreeGroup'])
             ->name('telegram.free-group.update');
     });
+
+    // Notification Routes
+    Route::get('/notifications', [AdminNotificationController::class, 'index'])
+        ->name('notifications.index');
+    Route::post('/notifications/{id}/mark-read', [AdminNotificationController::class, 'markAsRead'])
+        ->name('notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])
+        ->name('notifications.mark-all-read');
 });
 
 // Bettor Routes
@@ -114,14 +123,15 @@ Route::middleware(['auth', 'verified', 'role:bettor'])->prefix('bettor')->name('
     // Free Tips (available to all authenticated bettors)
     Route::get('/tips/free', [BettorTipController::class, 'freeTips'])
         ->name('tips.free');
-    Route::get('/tips/{tip}', [BettorTipController::class, 'show'])
-        ->name('tips.show');
 
     // Premium Tips (requires subscription)
     Route::middleware('subscription')->group(function () {
         Route::get('/tips/premium', [BettorTipController::class, 'premiumTips'])
             ->name('tips.premium');
     });
+
+    Route::get('/tips/{tip}', [BettorTipController::class, 'show'])
+        ->name('tips.show');
 
     // Profile
     Route::get('/profile', [BettorProfileController::class, 'edit'])
