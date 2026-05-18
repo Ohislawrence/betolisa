@@ -13,6 +13,9 @@ use App\Http\Controllers\Bettor\TipController as BettorTipController;
 use App\Http\Controllers\Bettor\ProfileController as BettorProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicTipController;
+use App\Http\Controllers\SitemapController;
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/', function () {
     return view('home');
