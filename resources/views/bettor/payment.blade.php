@@ -70,7 +70,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-1">Pay with Card</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-1">Pay with Paystack</h3>
                         <p class="text-sm text-gray-500 mb-6">Securely pay with your debit or credit card via Paystack. You will be redirected to their checkout and returned here once done.</p>
 
                         <form action="{{ route('bettor.payment.initialize') }}" method="POST">
