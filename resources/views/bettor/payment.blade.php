@@ -53,15 +53,11 @@
                     <div class="flex w-full">
                         <button onclick="switchTab('card')" id="tab-card"
                             class="tab-btn flex-1 px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-medium text-center border-b-2 transition-all whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 border-blue-600 text-blue-700 bg-blue-50">
-                            💳 <span>Pay Online</span>
-                        </button>
-                        <button onclick="switchTab('transfer')" id="tab-transfer"
-                            class="tab-btn flex-1 px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-medium text-center border-b-2 transition-all whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            🏦 <span>Bank Transfer</span>
+                            💳 <span>Pay Method</span>
                         </button>
                         <button onclick="switchTab('email')" id="tab-email"
                             class="tab-btn flex-1 px-3 sm:px-5 py-3 sm:py-4 text-xs sm:text-sm font-medium text-center border-b-2 transition-all whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            ✉️ <span>Email Us</span>
+                            💬 <span>Alternate Payment</span>
                         </button>
                     </div>
                 </div>
@@ -98,103 +94,37 @@
                     </div>
                 </div>
 
-                {{-- ── Panel: Bank Transfer ── --}}
-                <div id="panel-transfer" class="p-4 sm:p-6 lg:p-8 hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 text-xs font-bold flex items-center justify-center">1</span>
-                                Transfer to this account
-                            </h3>
-                            <div class="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-5 mb-4">
-                                <div class="space-y-3 text-sm">
-                                    <div class="flex justify-between items-start gap-2 pb-3 border-b border-amber-200">
-                                        <span class="text-amber-700 font-medium shrink-0">Bank</span>
-                                        <span class="font-bold text-gray-900 text-right">Guarantee Trust Bank (GTB)</span>
-                                    </div>
-                                    <div class="flex justify-between items-start gap-2 pb-3 border-b border-amber-200">
-                                        <span class="text-amber-700 font-medium shrink-0">Account Name</span>
-                                        <span class="font-bold text-gray-900 text-right">BETOLISA LIMITED</span>
-                                    </div>
-                                    <div class="flex justify-between items-center gap-2">
-                                        <span class="text-amber-700 font-medium shrink-0">Account No.</span>
-                                        <span class="font-bold text-gray-900 text-base sm:text-xl tracking-widest font-mono">3004085537</span>
-                                    </div>
-                                </div>
-                                <button onclick="copyAcct()" id="copy-btn"
-                                    class="mt-4 w-full text-xs text-blue-700 border border-blue-300 rounded-lg py-2.5 hover:bg-blue-100 transition-colors font-medium">
-                                    📋 Copy Account Number
-                                </button>
-                            </div>
-                            <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm">
-                                <p class="font-semibold text-blue-800 mb-1">Amount to transfer</p>
-                                <p class="text-2xl font-bold text-blue-900">&#8358;{{ number_format($cost) }}</p>
-                                <p class="text-xs text-blue-600 mt-1">Transfer exactly this amount, then fill in the form.</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 text-xs font-bold flex items-center justify-center">2</span>
-                                Confirm your transfer
-                            </h3>
-                            <form action="{{ route('bettor.payment.transfer') }}" method="POST" class="space-y-4">
-                                @csrf
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Sender Name <span class="text-red-500">*</span></label>
-                                    <input type="text" name="sender_name" value="{{ old('sender_name', auth()->user()->name) }}" required
-                                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-400 focus:outline-none"
-                                        placeholder="Name used for the transfer">
-                                    @error('sender_name')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Transfer Date <span class="text-red-500">*</span></label>
-                                    <input type="date" name="transfer_date" value="{{ old('transfer_date', date('Y-m-d')) }}" required
-                                        max="{{ date('Y-m-d') }}"
-                                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-400 focus:outline-none">
-                                    @error('transfer_date')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Transaction ID / Note <span class="text-gray-400 font-normal">(optional)</span></label>
-                                    <input type="text" name="note" value="{{ old('note') }}" maxlength="200"
-                                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-400 focus:outline-none"
-                                        placeholder="e.g. bank session ID or teller number">
-                                </div>
-                                <button type="submit"
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    I've Transferred — Submit
-                                </button>
-                                <p class="text-xs text-gray-400 text-center">Admin will verify and activate your subscription within a few hours.</p>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- ── Panel: Email Us ── --}}
+                {{-- ── Panel: Alternate Payment ── --}}
                 <div id="panel-email" class="p-4 sm:p-6 lg:p-8 hidden">
                     <div class="max-w-xl mx-auto">
-                        <div class="flex items-center gap-4 mb-6">
+                        <div class="flex items-center gap-4 mb-5">
                             <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-base font-semibold text-gray-900">Send Us a Message</h3>
-                                <p class="text-sm text-gray-500">Have questions about payment? We'll reply to <strong>{{ auth()->user()->email }}</strong> as soon as possible.</p>
+                                <h3 class="text-base font-semibold text-gray-900">Request Payment Details</h3>
+                                <p class="text-sm text-gray-500">Submit this form and we will send you alternate payment details to <strong>{{ auth()->user()->email }}</strong>.</p>
                             </div>
+                        </div>
+
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
+                            <p class="text-sm text-amber-800 font-medium mb-1">📋 How it works</p>
+                            <ol class="text-sm text-amber-700 space-y-1 list-decimal list-inside">
+                                <li>Fill in your name and a brief note below.</li>
+                                <li>Submit the form — we review your request.</li>
+                                <li>Payment details will be sent to <strong>{{ auth()->user()->email }}</strong>.</li>
+                                <li>Complete the payment and your subscription will be activated.</li>
+                            </ol>
                         </div>
 
                         @if(session('email_sent'))
                             <div class="bg-green-50 border border-green-200 rounded-xl p-5 mb-5 flex items-start gap-3">
                                 <span class="text-2xl">✅</span>
                                 <div>
-                                    <p class="font-semibold text-green-800">Message sent!</p>
-                                    <p class="text-sm text-green-700 mt-0.5">We've received your message and will reply to {{ auth()->user()->email }} shortly.</p>
+                                    <p class="font-semibold text-green-800">Request sent!</p>
+                                    <p class="text-sm text-green-700 mt-0.5">We've received your request and will send payment details to {{ auth()->user()->email }} shortly.</p>
                                 </div>
                             </div>
                         @endif
@@ -202,27 +132,27 @@
                         <form action="{{ route('bettor.payment.contact') }}" method="POST" class="space-y-4">
                             @csrf
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                                <input type="text" name="subject" value="{{ old('subject', 'Subscription Payment Enquiry') }}" maxlength="150"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                                <input type="text" name="subject" value="{{ old('subject', auth()->user()->name) }}" maxlength="150"
                                     class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-400 focus:outline-none"
-                                    placeholder="What is this about?">
+                                    placeholder="Your full name">
                                 @error('subject')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Message <span class="text-red-500">*</span></label>
-                                <textarea name="message" required rows="5" maxlength="2000"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Additional Note <span class="text-gray-400 font-normal">(optional)</span></label>
+                                <textarea name="message" rows="3" maxlength="2000"
                                     class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-400 focus:outline-none resize-none"
-                                    placeholder="Describe your payment situation or ask your question here...">{{ old('message') }}</textarea>
+                                    placeholder="Any additional information you'd like us to know...">{{ old('message') }}</textarea>
                                 @error('message')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                             </div>
                             <button type="submit"
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md">
+                                class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow hover:shadow-md">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                 </svg>
-                                Send Message
+                                Send Request — Get Payment Details
                             </button>
-                            <p class="text-xs text-gray-400 text-center">We typically respond within a few hours during business hours.</p>
+                            <p class="text-xs text-gray-400 text-center">Payment details will be emailed to you within a few hours during business hours.</p>
                         </form>
                     </div>
                 </div>
@@ -238,7 +168,7 @@
     </div>
 
     <script>
-        const TABS = ['card', 'transfer', 'email'];
+        const TABS = ['card', 'email'];
 
         function switchTab(tab) {
             TABS.forEach(function(t) {
@@ -253,24 +183,10 @@
             active.classList.add('border-blue-600', 'text-blue-700', 'bg-blue-50');
         }
 
-        function copyAcct() {
-            navigator.clipboard.writeText('3004085537').then(function () {
-                const btn = document.getElementById('copy-btn');
-                btn.textContent = '✓ Copied!';
-                btn.classList.add('bg-blue-100');
-                setTimeout(() => {
-                    btn.textContent = '📋 Copy Account Number';
-                    btn.classList.remove('bg-blue-100');
-                }, 2000);
-            });
-        }
-
         @if(session('active_tab'))
             switchTab('{{ session('active_tab') }}');
         @elseif($errors->hasAny(['message', 'subject']))
             switchTab('email');
-        @elseif($errors->hasAny(['sender_name', 'transfer_date']))
-            switchTab('transfer');
         @endif
     </script>
 </x-app-layout>

@@ -59,77 +59,72 @@
 
 
 
-            <!-- Notification Bell -->
-            @if(auth()->user()?->hasRole('bettor') || auth()->user()?->hasRole('admin'))
-                @php
-                    $isAdmin = auth()->user()->hasRole('admin');
-                    $notifIndexRoute = $isAdmin ? route('admin.notifications.index') : route('bettor.notifications.index');
-                    $notifMarkAllRoute = $isAdmin ? route('admin.notifications.mark-all-read') : route('bettor.notifications.mark-all-read');
-                @endphp
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="relative text-gray-500 hover:text-gray-700 focus:outline-none">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-                            </path>
-                        </svg>
-                        @php
-                            $unreadCount = auth()->user()->unreadNotifications()->count();
-                        @endphp
-                        @if($unreadCount > 0)
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-                            </span>
-                        @endif
-                    </button>
+            <!-- Settings Dropdown -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-4">
+                <!-- Notification Bell -->
+                @if(auth()->user()?->hasRole('bettor') || auth()->user()?->hasRole('admin'))
+                    @php
+                        $isAdmin = auth()->user()->hasRole('admin');
+                        $notifIndexRoute = $isAdmin ? route('admin.notifications.index') : route('bettor.notifications.index');
+                        $notifMarkAllRoute = $isAdmin ? route('admin.notifications.mark-all-read') : route('bettor.notifications.mark-all-read');
+                        $unreadCount = auth()->user()->unreadNotifications()->count();
+                    @endphp
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="relative text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                                </path>
+                            </svg>
+                            @if($unreadCount > 0)
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                                </span>
+                            @endif
+                        </button>
 
-                    <!-- Dropdown -->
-                    <div x-show="open" @click.away="open = false"
-                        class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
-                        <div class="p-4 border-b">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-medium">Notifications</h3>
-                                @if($unreadCount > 0)
-                                    <form action="{{ $notifMarkAllRoute }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-500">
-                                            Mark all read
-                                        </button>
-                                    </form>
-                                @endif
+                        <!-- Dropdown -->
+                        <div x-show="open" @click.away="open = false"
+                            class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
+                            <div class="p-4 border-b">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-medium">Notifications</h3>
+                                    @if($unreadCount > 0)
+                                        <form action="{{ $notifMarkAllRoute }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-500">
+                                                Mark all read
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="divide-y">
+                                @php
+                                    $notifications = auth()->user()->notifications()->take(5)->get();
+                                @endphp
+
+                                @forelse($notifications as $notification)
+                                    <div class="p-4 hover:bg-gray-50 {{ $notification->read_at ? '' : 'bg-indigo-50' }}">
+                                        <p class="text-sm text-gray-800">{{ $notification->data['message'] }}</p>
+                                        <span class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
+                                    </div>
+                                @empty
+                                    <div class="p-4 text-center text-sm text-gray-500">
+                                        No notifications yet
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            <div class="p-3 border-t text-center">
+                                <a href="{{ $notifIndexRoute }}" class="text-sm text-indigo-600 hover:text-indigo-500">
+                                    View All Notifications
+                                </a>
                             </div>
                         </div>
-
-                        <div class="divide-y">
-                            @php
-                                $notifications = auth()->user()->notifications()->take(5)->get();
-                            @endphp
-
-                            @forelse($notifications as $notification)
-                                <div class="p-4 hover:bg-gray-50 {{ $notification->read_at ? '' : 'bg-indigo-50' }}">
-                                    <p class="text-sm text-gray-800">{{ $notification->data['message'] }}</p>
-                                    <span class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
-                                </div>
-                            @empty
-                                <div class="p-4 text-center text-sm text-gray-500">
-                                    No notifications yet
-                                </div>
-                            @endforelse
-                        </div>
-
-                        <div class="p-3 border-t text-center">
-                            <a href="{{ $notifIndexRoute }}" class="text-sm text-indigo-600 hover:text-indigo-500">
-                                View All Notifications
-                            </a>
-                        </div>
                     </div>
-                </div>
-            @endif
-
-
-
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+                @endif
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
