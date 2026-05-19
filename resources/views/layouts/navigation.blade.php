@@ -171,6 +171,30 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <!-- Responsive Navigation for Admin -->
+        @if(auth()->user()?->hasRole('admin'))
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.leagues.index')" :active="request()->routeIs('admin.leagues.*')">
+                    {{ __('Leagues') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.tips.index')" :active="request()->routeIs('admin.tips.*')">
+                    {{ __('Tips') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                    {{ __('Bettors') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.settings.subscription')" :active="request()->routeIs('admin.settings.subscription')">
+                    {{ __('Subscription Settings') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.settings.telegram')" :active="request()->routeIs('admin.settings.telegram')">
+                    {{ __('Telegram') }}
+                </x-responsive-nav-link>
+            </div>
+        @endif
+
         <!-- Responsive Navigation for Bettor -->
         @if(auth()->user()?->hasRole('bettor'))
             <div class="pt-2 pb-3 space-y-1">
